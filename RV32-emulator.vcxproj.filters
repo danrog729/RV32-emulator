@@ -15,15 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RV32-emulator.cpp">
+    <ClCompile Include="boot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="running.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="running.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -155,7 +155,7 @@ l1CacheFullLine get_cache_line(uint8_t* cache, l1CacheSet* metadata, uint32_t ad
 	// grab the part of the cache metadata that relates to the index
 	l1CacheSet* set = &(metadata[index]);
 
-	l1CacheFullLine output;
+	l1CacheFullLine output = { NULL, 0 };
 
 	// the beginning of the cache line is the index of the address * 128
 	output.cacheIndex = (index << 7);

@@ -10,9 +10,7 @@
 #endif
 
 #include "cache.h"
-
-uint32_t pc;
-uint32_t registers[32];
+#include "running.h"
 
 FILE* biosChip;
 FILE* secondaryStorage;
@@ -49,20 +47,8 @@ int main(int argc, char* argv[])
 	}
 	fclose(biosChip);
 
-	pc = 0;
-
-	uint8_t shouldTerminate = 0;
-	while (shouldTerminate == 0)
-	{
-		// running
-		uint32_t opcode = read_program_memory(pc);
-
-		pc += 4;
-		if (pc == 128)
-		{
-			shouldTerminate = 1;
-		}
-	}
+	// running
+	run_cpu();
 
 	// shutdown
 

@@ -128,10 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cache.cpp" />
-    <ClCompile Include="RV32-emulator.cpp" />
+    <ClCompile Include="boot.cpp" />
+    <ClCompile Include="running.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cache.h" />
+    <ClInclude Include="running.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
