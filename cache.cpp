@@ -97,6 +97,7 @@ void write_memory_b(uint32_t address, uint8_t data)
 	uint8_t addressOffset = address & 0x0000003f; // last 6 bits of address
 
 	l1CacheFullLine cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address);
+	cacheLine.metadata->dirty = 1;
 
 	l1CacheData[cacheLine.cacheIndex + addressOffset] = data;
 }
@@ -111,8 +112,10 @@ void write_memory_s(uint32_t address, uint16_t data)
 	uint8_t addressOffset = address & 0x0000003f; // last 6 bits of address
 
 	l1CacheFullLine cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address);
+	cacheLine.metadata->dirty = 1;
 	l1CacheData[cacheLine.cacheIndex + addressOffset] = (uint8_t)(data >> 8 & 0x00ff);
 	cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address + 1);
+	cacheLine.metadata->dirty = 1;
 	l1CacheData[cacheLine.cacheIndex + addressOffset + 1] = (uint8_t)(data & 0x00ff);
 }
 
@@ -126,12 +129,16 @@ void write_memory_i(uint32_t address, uint32_t data)
 	uint8_t addressOffset = address & 0x0000003f; // last 6 bits of address
 
 	l1CacheFullLine cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address);
+	cacheLine.metadata->dirty = 1;
 	l1CacheData[cacheLine.cacheIndex + addressOffset] = (uint8_t)(data >> 24 & 0x00ff);
 	cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address + 1);
+	cacheLine.metadata->dirty = 1;
 	l1CacheData[cacheLine.cacheIndex + addressOffset + 1] = (uint8_t)(data >> 16 & 0x00ff);
 	cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address + 1);
+	cacheLine.metadata->dirty = 1;
 	l1CacheData[cacheLine.cacheIndex + addressOffset + 2] = (uint8_t)(data >> 8 & 0x00ff);
 	cacheLine = get_cache_line(l1CacheData, l1CacheDataMetadata, address + 1);
+	cacheLine.metadata->dirty = 1;
 	l1CacheData[cacheLine.cacheIndex + addressOffset + 3] = (uint8_t)(data & 0x00ff);
 }
 
