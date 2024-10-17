@@ -233,6 +233,12 @@ l1CacheFullLine get_cache_line(uint8_t* cache, l1CacheSet* metadata, uint32_t ad
 	return output;
 }
 
+/// <summary>
+/// Copies 64 bytes from the RAM at the given line address into the cache at the given cache index
+/// </summary>
+/// <param name="cache"> The cache for the RAM to copy into. </param>
+/// <param name="cacheIndex"> The index into the cache where the first byte should be copied into. </param>
+/// <param name="lineAddress"> The index into the RAM where the first byte should be taken from. </param>
 void read_ram(uint8_t* cache, uint32_t cacheIndex, uint32_t lineAddress)
 {
 	for (int byte = 0; byte < 64; byte++)
@@ -241,6 +247,12 @@ void read_ram(uint8_t* cache, uint32_t cacheIndex, uint32_t lineAddress)
 	}
 }
 
+/// <summary>
+/// Copies 64 bytes from the cache at the given cache index into the RAM at the given line address
+/// </summary>
+/// <param name="cache"> The cache for the RAM to be copied from. </param>
+/// <param name="cacheIndex"> The index into the cache where the first byte should be taken from. </param>
+/// <param name="lineAddress"> The index into the RAM where the first byte should be copied into. </param>
 void write_ram(uint8_t* cache, uint32_t cacheIndex, uint32_t lineAddress)
 {
 	for (int byte = 0; byte < 64; byte++)
