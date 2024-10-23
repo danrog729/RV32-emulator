@@ -2,7 +2,7 @@
 #include "cache.h"
 
 uint32_t pc = 0;
-uint32_t registers[32];
+int32_t registers[32];
 
 /// <summary>
 /// The execution is in this function for the majority of the time. It loops from the end of the boot to shutdown.
@@ -24,77 +24,190 @@ void run_cpu()
 		if (opcode == 0b0110011)
 		{
 			// R-type instruction
-			uint8_t rd = instruction >> 7 & 0x01f;
-			uint8_t funct3 = instruction >> 12 & 0x07;
-			uint8_t rs1 = instruction >> 15 & 0x01f;
-			uint8_t rs2 = instruction >> 20 & 0x01f;
-			uint8_t funct7 = instruction >> 25 & 0x7f;
-
-			if (funct3 == 0x0 && funct7 == 0x00)
-			{
-				// add (ADD)
-				registers[rd] = registers[rs1] + registers[rs2];
-			}
-			else if (funct3 == 0x0 && funct7 == 0x20)
-			{
-				// sub (SUB)
-				registers[rd] = registers[rs1] - registers[rs2];
-			}
-			else if (funct3 == 0x4 && funct7 == 0x00)
-			{
-				// xor (XOR)
-				registers[rd] = registers[rs1] ^ registers[rs2];
-			}
-			else if (funct3 == 0x6 && funct7 == 0x00)
-			{
-				// or (OR)
-				registers[rd] = registers[rs1] | registers[rs2];
-			}
-			else if (funct3 == 0x7 && funct7 == 0x00)
-			{
-				// and (AND)
-				registers[rd] = registers[rs1] & registers[rs2];
-			}
-			else if (funct3 == 0x1 && funct7 == 0x00)
-			{
-				// sll (Shift Left Logical)
-				registers[rd] = registers[rs1] << registers[rs2];
-			}
-			else if (funct3 == 0x5 && funct7 == 0x00)
-			{
-				// srl (Shift Right Logical)
-				registers[rd] = (uint32_t)registers[rs1] >> registers[rs2];
-			}
-			else if (funct3 == 0x5 && funct7 == 0x20)
-			{
-				// sra (Shift Right Arithmetic)
-				registers[rd] = (int32_t)registers[rs1] >> registers[rs2];
-			}
-			else if (funct3 == 0x2 && funct7 == 0x00)
-			{
-				// slt (Set Less Than)
-				if (registers[rs1] < registers[rs2])
-				{
-					registers[rd] = 1;
-				}
-				else
-				{
-					registers[rd] = 0;
-				}
-			}
-			else if (funct3 == 0x3 && funct7 == 0x00)
-			{
-				// sltu (Set Less Than (Unsigned))
-				if ((uint32_t)registers[rs1] < (uint32_t)registers[rs2])
-				{
-					registers[rd] = 1;
-				}
-				else
-				{
-					registers[rd] = 0;
-				}
-			}
+			R_type(instruction);
+		}
+		else if (opcode == 0b0010011 || opcode == 0b00000011)
+		{
+			// I-type instruction
+			I_type(instruction);
 		}
 	}
 	return;
+}
+
+inline void R_type(uint32_t instruction)
+{
+	uint8_t rd = instruction >> 7 & 0x01f;
+	uint8_t funct3 = instruction >> 12 & 0x07;
+	uint8_t rs1 = instruction >> 15 & 0x01f;
+	uint8_t rs2 = instruction >> 20 & 0x01f;
+	uint8_t funct7 = instruction >> 25 & 0x7f;
+
+	if (funct3 == 0x0 && funct7 == 0x00)
+	{
+		// add (ADD)
+		registers[rd] = registers[rs1] + registers[rs2];
+	}
+	else if (funct3 == 0x0 && funct7 == 0x20)
+	{
+		// sub (SUB)
+		registers[rd] = registers[rs1] - registers[rs2];
+	}
+	else if (funct3 == 0x4 && funct7 == 0x00)
+	{
+		// xor (XOR)
+		registers[rd] = registers[rs1] ^ registers[rs2];
+	}
+	else if (funct3 == 0x6 && funct7 == 0x00)
+	{
+		// or (OR)
+		registers[rd] = registers[rs1] | registers[rs2];
+	}
+	else if (funct3 == 0x7 && funct7 == 0x00)
+	{
+		// and (AND)
+		registers[rd] = registers[rs1] & registers[rs2];
+	}
+	else if (funct3 == 0x1 && funct7 == 0x00)
+	{
+		// sll (Shift Left Logical)
+		registers[rd] = registers[rs1] << registers[rs2];
+	}
+	else if (funct3 == 0x5 && funct7 == 0x00)
+	{
+		// srl (Shift Right Logical)
+		registers[rd] = (uint32_t)registers[rs1] >> registers[rs2];
+	}
+	else if (funct3 == 0x5 && funct7 == 0x20)
+	{
+		// sra (Shift Right Arithmetic)
+		registers[rd] = (int32_t)registers[rs1] >> registers[rs2];
+	}
+	else if (funct3 == 0x2 && funct7 == 0x00)
+	{
+		// slt (Set Less Than)
+		if ((int32_t)registers[rs1] < (int32_t)registers[rs2])
+		{
+			registers[rd] = 1;
+		}
+		else
+		{
+			registers[rd] = 0;
+		}
+	}
+	else if (funct3 == 0x3 && funct7 == 0x00)
+	{
+		// sltu (Set Less Than (Unsigned))
+		if ((uint32_t)registers[rs1] < (uint32_t)registers[rs2])
+		{
+			registers[rd] = 1;
+		}
+		else
+		{
+			registers[rd] = 0;
+		}
+	}
+}
+
+inline void I_type(uint32_t instruction)
+{
+	uint8_t opcode = instruction & 0x7f;
+	uint8_t rd = instruction >> 7 & 0x1f;
+	uint8_t funct3 = instruction >> 12 & 0x07;
+	uint8_t rs1 = instruction >> 15 & 0x1f;
+	uint16_t imm = instruction >> 20 & 0x07ff;
+
+	if (opcode == 0b0010011)
+	{
+		if (funct3 == 0x0)
+		{
+			// addi (ADD Immediate)
+			registers[rd] = registers[rs1] + imm;
+		}
+		else if (funct3 == 0x4)
+		{
+			// xori (XOR Immediate)
+			registers[rd] = registers[rs1] ^ imm;
+		}
+		else if (funct3 == 0x6)
+		{
+			// ori (OR Immediate)
+			registers[rd] = registers[rs1] | imm;
+		}
+		else if (funct3 == 0x7)
+		{
+			// andi (AND Immediate)
+			registers[rd] = registers[rs1] & imm;
+		}
+		else if (funct3 == 0x1)
+		{
+			//slli (Shift Left Logical Imm)
+			imm &= 0x001f;
+			registers[rd] = registers[rs1] << imm;
+		}
+		else if (funct3 == 0x5 && (imm >> 10 & 0x0001) == 0)
+		{
+			// srli (Shift Right Logical Imm)
+			imm &= 0x001f;
+			registers[rd] = (uint32_t)registers[rd] >> imm;
+		}
+		else if (funct3 == 0x5 && (imm >> 10 & 0x0001) == 1)
+		{
+			// srai (Shift Right Arith Imm)
+			imm &= 0x001f;
+			registers[rd] = (int32_t)registers[rd] >> imm;
+		}
+		else if (funct3 == 0x2)
+		{
+			// slti (Set Less Than Imm)
+			if ((int32_t)registers[rd] < (int32_t)imm)
+			{
+				rd = 1;
+			}
+			else
+			{
+				rd = 0;
+			}
+		}
+		else if (funct3 == 0x3)
+		{
+			// sltiu (Set Less Than Imm (U))
+			if ((uint32_t)registers[rd] < (uint32_t)imm)
+			{
+				rd = 1;
+			}
+			else
+			{
+				rd = 0;
+			}
+		}
+	}
+	else if (opcode == 0b0000011)
+	{
+		if (funct3 == 0x0)
+		{
+			// lb (Load Byte)
+			registers[rd] = (int32_t)read_memory_b((uint32_t)registers[rs1] + imm);
+		}
+		else if (funct3 == 0x1)
+		{
+			// lh (Load Half)
+			registers[rd] = (int32_t)read_memory_s((uint32_t)registers[rs1] + imm);
+		}
+		else if (funct3 == 0x2)
+		{
+			// lw (Load Word)
+			registers[rd] = (int32_t)read_memory_i((uint32_t)registers[rs1] + imm);
+		}
+		else if (funct3 == 0x4)
+		{
+			// lbu (Load Byte (U))
+			registers[rd] = (uint32_t)read_memory_b((uint32_t)registers[rs1] + imm);
+		}
+		else if (funct3 == 0x5)
+		{
+			// lhu (Load Half (U))
+			registers[rd] = (uint32_t)read_memory_s((uint32_t)registers[rs1] + imm);
+		}
+	}
 }
