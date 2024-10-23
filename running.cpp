@@ -26,10 +26,15 @@ void run_cpu()
 			// R-type instruction
 			R_type(instruction);
 		}
-		else if (opcode == 0b0010011 || opcode == 0b00000011)
+		else if (opcode == 0b0010011 || opcode == 0b00000011 || opcode == 0b1110011)
 		{
 			// I-type instruction
 			I_type(instruction);
+		}
+		else if (opcode == 0b0100011)
+		{
+			// S-type instruction
+			S_type(instruction);
 		}
 	}
 	return;
@@ -145,13 +150,13 @@ inline void I_type(uint32_t instruction)
 			imm &= 0x001f;
 			registers[rd] = registers[rs1] << imm;
 		}
-		else if (funct3 == 0x5 && (imm >> 10 & 0x0001) == 0)
+		else if (funct3 == 0x5 && imm == 0x0000)
 		{
 			// srli (Shift Right Logical Imm)
 			imm &= 0x001f;
 			registers[rd] = (uint32_t)registers[rd] >> imm;
 		}
-		else if (funct3 == 0x5 && (imm >> 10 & 0x0001) == 1)
+		else if (funct3 == 0x5 && imm == 0x0400)
 		{
 			// srai (Shift Right Arith Imm)
 			imm &= 0x001f;
@@ -209,5 +214,44 @@ inline void I_type(uint32_t instruction)
 			// lhu (Load Half (U))
 			registers[rd] = (uint32_t)read_memory_s((uint32_t)registers[rs1] + imm);
 		}
+	}
+	else if (opcode == 0b1110011)
+	{
+		if (funct3 == 0x0 && imm == 0x0)
+		{
+			// ecall (Environment Call)
+			// NOT YET IMPLEMENTED
+		}
+		else if (funct3 == 0x0 && imm == 0x1)
+		{
+			// ebreak (Environment Break)
+			// NOT YET IMPLEMENTED
+		}
+	}
+}
+
+inline void S_type(uint32_t instruction)
+{
+	uint8_t immLower = instruction >> 7 & 0x01f;
+	uint8_t funct3 = instruction >> 12 & 0x07;
+	uint8_t rs1 = instruction >> 15 & 0x01f;
+	uint8_t rs2 = instruction >> 20 & 0x01f;
+	uint8_t immUpper = instruction >> 25 & 0x7f;
+	uint16_t imm = immUpper << 5 + immLower;
+
+	if (funct3 == 0x0)
+	{
+		// sb (Store Byte)
+		write_memory_b((uint32_t)registers[rs1] + imm, (uint8_t)registers[rs2]);
+	}
+	else if (funct3 == 0x1)
+	{
+		// sh (Store Half)
+		write_memory_s((uint32_t)registers[rs1] + imm, (uint16_t)registers[rs2]);
+	}
+	else if (funct3 == 0x2)
+	{
+		// sw (Store Word)
+		write_memory_i((uint32_t)registers[rs1] + imm, (uint32_t)registers[rs2]);
 	}
 }
