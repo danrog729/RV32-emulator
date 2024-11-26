@@ -6,7 +6,7 @@ int32_t registers[32];
 
 /// <summary>
 /// The execution is in this function for the majority of the time. It loops from the end of the boot to shutdown.
-/// It acts as the CPU, which means it fetches instructions from memory, decodes them and performs them.
+/// It acts as the CPU, which means it fetches instructions from memory, decodes them and executes them.
 /// </summary>
 void run_cpu()
 {
@@ -27,6 +27,7 @@ void run_cpu()
 			R_type(instruction); break;
 		case 0b0010011:
 		case 0b0000011:
+		case 0b1100111:
 		case 0b1110011:
 			I_type(instruction); break;
 		case 0b0100011:
@@ -36,6 +37,8 @@ void run_cpu()
 		case 0b0110111:
 		case 0b0010111:
 			U_type(instruction); break;
+		case 0b1101111:
+			J_type(instruction); break;
 		}
 	}
 	return;
@@ -216,6 +219,15 @@ inline void I_type(uint32_t instruction)
 			registers[rd] = (uint32_t)read_memory_s((uint32_t)registers[rs1] + imm);
 		}
 	}
+	else if (opcode == 0b1100111)
+	{
+		if (funct3 == 0x0)
+		{
+			// jalr (Jump And Link Reg)
+			registers[rd] = pc + 4;
+			pc = registers[rs1] + imm;
+		}
+	}
 	else if (opcode == 0b1110011)
 	{
 		if (funct3 == 0x0 && imm == 0x0)
@@ -333,4 +345,18 @@ inline void U_type(uint32_t instruction)
 		// auipc (Add upper immediate to PC)
 		registers[rd] = pc + immediate;
 	}
+}
+
+inline void J_type(uint32_t instruction)
+{
+	uint8_t opcode = instruction & 0x7f;
+	uint8_t rd = (instruction >> 7) & 0x1f;
+	uint32_t immediate = (instruction >> 20) & 0x7fe;
+	immediate |= (instruction >> 9) & 0x800;
+	immediate |= instruction & 0xff000;
+	immediate |= (instruction >> 11) & 0x1fffff;
+
+	// jal (Jump And Link)
+	registers[rd] = pc + 4;
+	pc += immediate;
 }
