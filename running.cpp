@@ -21,25 +21,21 @@ void run_cpu()
 		
 		uint8_t opcode = instruction & 0x7f;
 
-		if (opcode == 0b0110011)
+		switch (opcode)
 		{
-			// R-type instruction
-			R_type(instruction);
-		}
-		else if (opcode == 0b0010011 || opcode == 0b00000011 || opcode == 0b1110011)
-		{
-			// I-type instruction
-			I_type(instruction);
-		}
-		else if (opcode == 0b0100011)
-		{
-			// S-type instruction
-			S_type(instruction);
-		}
-		else if (opcode == 0b1100011)
-		{
-			// B-type instruction
-			B_type(instruction);
+		case 0b0110011:
+			R_type(instruction); break;
+		case 0b0010011:
+		case 0b0000011:
+		case 0b1110011:
+			I_type(instruction); break;
+		case 0b0100011:
+			S_type(instruction); break;
+		case 0b1100011:
+			B_type(instruction); break;
+		case 0b0110111:
+		case 0b0010111:
+			U_type(instruction); break;
 		}
 	}
 	return;
@@ -318,5 +314,23 @@ inline void B_type(uint32_t instruction)
 		{
 			pc += immediate;
 		}
+	}
+}
+
+inline void U_type(uint32_t instruction)
+{
+	uint32_t immediate = instruction & 0xfffff000;
+	uint8_t rd = (instruction >> 7) & 0x1f;
+	uint8_t opcode = instruction & 0x7f;
+
+	if (opcode == 0b0110111)
+	{
+		// lui (Load upper immediate)
+		registers[rd] = immediate;
+	}
+	else if (opcode == 0b0010111)
+	{
+		// auipc (Add upper immediate to PC)
+		registers[rd] = pc + immediate;
 	}
 }
