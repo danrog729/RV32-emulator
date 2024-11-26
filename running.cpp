@@ -36,6 +36,11 @@ void run_cpu()
 			// S-type instruction
 			S_type(instruction);
 		}
+		else if (opcode == 0b1100011)
+		{
+			// B-type instruction
+			B_type(instruction);
+		}
 	}
 	return;
 }
@@ -253,5 +258,65 @@ inline void S_type(uint32_t instruction)
 	{
 		// sw (Store Word)
 		write_memory_i((uint32_t)registers[rs1] + imm, (uint32_t)registers[rs2]);
+	}
+}
+
+inline void B_type(uint32_t instruction)
+{
+	uint16_t immediate = (instruction >> 7) & 0x1e; // imm [4:1]
+	immediate |= (instruction >> 20) & 0x7e0;		// imm [10:5]
+	immediate |= (instruction << 4) & 0x800;		// imm [11]
+	immediate |= (instruction >> 19) & 0x1000;		// imm [12]
+	uint8_t funct3 = (instruction >> 12) & 0x7;
+	uint8_t rs1 = (instruction >> 15) & 0x1f;
+	uint8_t rs2 = (instruction >> 20) & 0x1f;
+
+	if (funct3 == 0x0)
+	{
+		// beq (Branch if equal)
+		if (registers[rs1] == registers[rs2])
+		{
+			pc += immediate;
+		}
+	}
+	else if (funct3 == 0x1)
+	{
+		// bne (Branch if not equal to)
+		if (registers[rs1] != registers[rs2])
+		{
+			pc += immediate;
+		}
+	}
+	else if (funct3 == 0x4)
+	{
+		// blt (Branch if less than)
+		if (registers[rs1] < registers[rs2])
+		{
+			pc += immediate;
+		}
+	}
+	else if (funct3 == 0x5)
+	{
+		// bge (Branch if greater than or equal to)
+		if (registers[rs1] >= registers[rs2])
+		{
+			pc += immediate;
+		}
+	}
+	else if (funct3 == 0x6)
+	{
+		// bltu (Branch if less than (unsigned))
+		if ((uint32_t)registers[rs1] < (uint32_t)registers[rs2])
+		{
+			pc += immediate;
+		}
+	}
+	else if (funct3 == 0x7)
+	{
+		// bgeu (Branch if greater than or equal to (unsigned))
+		if ((uint32_t)registers[rs1] >= (uint32_t)registers[rs2])
+		{
+			pc += immediate;
+		}
 	}
 }
