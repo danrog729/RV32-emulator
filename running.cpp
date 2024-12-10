@@ -1,5 +1,6 @@
 #include "running.h"
 #include "cache.h"
+#include <stdio.h>
 
 uint32_t pc = 0;
 int32_t registers[32];
@@ -232,11 +233,13 @@ inline void I_type(uint32_t instruction)
 	{
 		if (funct3 == 0x0 && imm == 0x0)
 		{
+			printf("ecall\n");
 			// ecall (Environment Call)
 			// NOT YET IMPLEMENTED
 		}
 		else if (funct3 == 0x0 && imm == 0x1)
 		{
+			printf("ebreak\n");
 			// ebreak (Environment Break)
 			// NOT YET IMPLEMENTED
 		}
@@ -245,12 +248,12 @@ inline void I_type(uint32_t instruction)
 
 inline void S_type(uint32_t instruction)
 {
-	uint8_t immLower = instruction >> 7 & 0x01f;
-	uint8_t funct3 = instruction >> 12 & 0x07;
-	uint8_t rs1 = instruction >> 15 & 0x01f;
-	uint8_t rs2 = instruction >> 20 & 0x01f;
-	uint8_t immUpper = instruction >> 25 & 0x7f;
-	uint16_t imm = immUpper << 5 + immLower;
+	uint8_t immLower = (instruction >> 7) & 0x01f;
+	uint8_t funct3 = (instruction >> 12) & 0x07;
+	uint8_t rs1 = (instruction >> 15) & 0x01f;
+	uint8_t rs2 = (instruction >> 20) & 0x01f;
+	uint8_t immUpper = (instruction >> 25) & 0x7f;
+	uint16_t imm = (immUpper << 5) + immLower;
 
 	if (funct3 == 0x0)
 	{
