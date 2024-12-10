@@ -250,7 +250,7 @@ void read_ram(uint8_t* cache, uint32_t cacheIndex, uint32_t lineAddress)
 {
 	for (int byte = 0; byte < 64; byte++)
 	{
-		cache[cacheIndex + byte] = ram[lineAddress +byte];
+		cache[cacheIndex + byte] = ram[lineAddress + byte];
 	}
 }
 

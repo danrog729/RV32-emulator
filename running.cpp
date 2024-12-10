@@ -12,6 +12,8 @@ int32_t registers[32];
 void run_cpu()
 {
 	uint8_t shouldTerminate = 0;
+	registers[10] = 225;
+	registers[11] = 60;
 	while (shouldTerminate == 0)
 	{
 		// running
@@ -274,10 +276,18 @@ inline void S_type(uint32_t instruction)
 
 inline void B_type(uint32_t instruction)
 {
-	uint16_t immediate = (instruction >> 7) & 0x1e; // imm [4:1]
+	int32_t immediate = (instruction >> 7) & 0x1e; // imm [4:1]
 	immediate |= (instruction >> 20) & 0x7e0;		// imm [10:5]
 	immediate |= (instruction << 4) & 0x800;		// imm [11]
 	immediate |= (instruction >> 19) & 0x1000;		// imm [12]
+	if (immediate >= 4096)
+	{
+		immediate |= 0xfffff000;
+	}
+	else
+	{
+		immediate &= 0x00000fff;
+	}
 	uint8_t funct3 = (instruction >> 12) & 0x7;
 	uint8_t rs1 = (instruction >> 15) & 0x1f;
 	uint8_t rs2 = (instruction >> 20) & 0x1f;
@@ -287,6 +297,7 @@ inline void B_type(uint32_t instruction)
 		// beq (Branch if equal)
 		if (registers[rs1] == registers[rs2])
 		{
+			pc -= 4;
 			pc += immediate;
 		}
 	}
@@ -295,6 +306,7 @@ inline void B_type(uint32_t instruction)
 		// bne (Branch if not equal to)
 		if (registers[rs1] != registers[rs2])
 		{
+			pc -= 4;
 			pc += immediate;
 		}
 	}
@@ -303,6 +315,7 @@ inline void B_type(uint32_t instruction)
 		// blt (Branch if less than)
 		if (registers[rs1] < registers[rs2])
 		{
+			pc -= 4;
 			pc += immediate;
 		}
 	}
@@ -311,6 +324,7 @@ inline void B_type(uint32_t instruction)
 		// bge (Branch if greater than or equal to)
 		if (registers[rs1] >= registers[rs2])
 		{
+			pc -= 4;
 			pc += immediate;
 		}
 	}
@@ -319,6 +333,7 @@ inline void B_type(uint32_t instruction)
 		// bltu (Branch if less than (unsigned))
 		if ((uint32_t)registers[rs1] < (uint32_t)registers[rs2])
 		{
+			pc -= 4;
 			pc += immediate;
 		}
 	}
@@ -327,6 +342,7 @@ inline void B_type(uint32_t instruction)
 		// bgeu (Branch if greater than or equal to (unsigned))
 		if ((uint32_t)registers[rs1] >= (uint32_t)registers[rs2])
 		{
+			pc -= 4;
 			pc += immediate;
 		}
 	}
